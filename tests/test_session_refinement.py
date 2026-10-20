@@ -40,3 +40,25 @@ async def test_sixth_refinement_rejected(data_dir):
         session = await refine(session, f"Shorter please {i}", data_dir)
     with pytest.raises(ValueError, match="refinement cap"):
         await refine(session, "Shorter again", data_dir)
+
+
+@pytest.mark.asyncio
+async def test_refine_pushback_pii_never_lands_in_session(data_dir):
+    """Pushback with raw PAN/phone must be redacted before specialist probe."""
+    import json
+
+    session = await handle_complaint(
+        "Why was I charged an exit load on HDFC Large Cap Fund?", data_dir
+    )
+    session = await refine(
+        session,
+        "user said his PAN is ABCDE1234F and phone 9876543210, new complaint",
+        data_dir,
+    )
+    blob = json.dumps(session.model_dump(), default=str)
+    assert "ABCDE1234F" not in blob
+    assert "9876543210" not in blob
+    assert session.compliance is not None
+    assert "ABCDE1234F" not in session.compliance.redacted_text
+    assert "[PAN]" in session.compliance.redacted_text or "PAN" in session.pii_types
+

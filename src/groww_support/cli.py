@@ -7,6 +7,7 @@ from pathlib import Path
 
 import typer
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
@@ -88,7 +89,7 @@ def print_session(session: SessionState) -> None:
     if review:
         console.print(f"review.status: {review.status} (round {review.round})")
         for f in review.failures:
-            console.print(f"  - {f.check}: {f.detail}")
+            console.print(f"  - {escape(f.check)}: {escape(f.detail)}")
 
     if session.agents_fired:
         console.print("agents_fired:")
@@ -136,7 +137,11 @@ def refine_cmd(
 ) -> None:
     """Selective refinement from a saved session."""
     session = load_session(session_path)
-    session = asyncio.run(refine_session(session, pushback, data_dir))
+    try:
+        session = asyncio.run(refine_session(session, pushback, data_dir))
+    except ValueError as exc:
+        console.print(f"[red]{escape(str(exc))}[/red]")
+        raise typer.Exit(code=1) from exc
     save_session(session, session_path)
     print_session(session)
     console.print(f"session saved: {session_path}")
@@ -180,9 +185,10 @@ def interactive(
 
         while True:
             if can_approve(session):
-                prompt = "[r]efine / [a]pprove / [q]uit: "
+                # Escape brackets so Rich does not treat [r]/[a]/[q] as markup.
+                prompt = r"\[r]efine / \[a]pprove / \[q]uit: "
             else:
-                prompt = "[r]efine / [q]uit (approve disabled): "
+                prompt = r"\[r]efine / \[q]uit (approve disabled): "
             action = console.input(prompt).strip().lower()
             if action in {"q", "quit", "exit"}:
                 return

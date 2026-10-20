@@ -352,7 +352,12 @@ async def refine(
     facts = session.facts
     pattern = session.pattern
     compliance = session.compliance
-    probe = f"{session.redacted_text}\n{pushback}".strip()
+    # Never put raw PII from pushback into specialist probe or session state.
+    pushback_ingress = redact(pushback)
+    probe = f"{session.redacted_text}\n{pushback_ingress.redacted_text}".strip()
+    pii_types = list(
+        dict.fromkeys([*session.pii_types, *pushback_ingress.pii_types])
+    )
 
     if plan.facts:
         facts = await run_facts(probe, data_dir / "parsed")
@@ -363,7 +368,7 @@ async def refine(
             data_dir / "normalized_reviews.json",
         )
     if plan.compliance:
-        compliance = await run_compliance(probe, list(session.pii_types))
+        compliance = await run_compliance(probe, pii_types)
 
     # Sticky: once true, never cleared by a later covered fact.
     advice_refusal = bool(session.advice_refusal) or bool(compliance.advice_refusal)
@@ -391,7 +396,7 @@ async def refine(
 
     return SessionState(
         redacted_text=session.redacted_text,
-        pii_types=list(session.pii_types),
+        pii_types=pii_types,
         facts=facts,
         pattern=pattern,
         compliance=compliance,

@@ -46,8 +46,11 @@ async def test_twenty_complaints_structured(data_dir: Path):
         else:
             assert session.draft.citation is None
             reply = session.draft.reply.lower()
+            assert "http" not in reply
             if session.draft.disposition == "refuse":
-                assert session.advice_refusal or "advice" in reply or "recommend" in reply
+                # Refusal text is fixed; citation/URL must stay absent.
+                assert session.advice_refusal is True
+                assert "cannot provide investment advice" in reply
             else:
                 assert (
                     "not cover" in reply
@@ -63,6 +66,9 @@ async def test_four_branches(data_dir: Path, tmp_path: Path):
     clean = await handle_complaint(by_id["branch_clean"]["text"], data_dir)
     assert clean.facts is not None and clean.facts.status == "covered"
     assert clean.pattern is not None and clean.pattern.theme_id == "fees_brokerage"
+    assert clean.draft is not None
+    assert clean.draft.disposition in ("escalate", "disagree")
+    assert "stays open" in clean.draft.routing_note.why.lower()
     assert clean.review is not None
     assert clean.agents_fired
     assert any(e.kind == "initial" for e in clean.agents_fired)
@@ -70,6 +76,7 @@ async def test_four_branches(data_dir: Path, tmp_path: Path):
     miss = await handle_complaint(by_id["branch_miss"]["text"], data_dir)
     assert miss.facts is not None and miss.facts.status == "not_covered"
     assert miss.draft is not None and miss.draft.citation is None
+    assert "http" not in miss.draft.reply.lower()
     assert miss.review is not None
     assert miss.agents_fired
 
@@ -82,6 +89,7 @@ async def test_four_branches(data_dir: Path, tmp_path: Path):
 
     pii = await handle_complaint(by_id["branch_pii"]["text"], data_dir)
     assert pii.review is not None
+    assert pii.review.status == "pass"
     assert pii.agents_fired
     blob = json.dumps(pii.model_dump(), default=str)
     assert RAW_PAN not in blob
@@ -92,10 +100,6 @@ async def test_four_branches(data_dir: Path, tmp_path: Path):
         assert RAW_PAN not in pii.draft.reply
         assert RAW_PHONE not in pii.draft.reply
 
-    if pii.review.status != "pass":
-        from groww_support.contracts import ReviewerResult
-
-        pii.review = ReviewerResult(status="pass", round=1, failures=[])
     arts = approve(pii, tmp_path)
     record = arts.record_path.read_text(encoding="utf-8")
     email = arts.email_path.read_text(encoding="utf-8")
@@ -115,6 +119,25 @@ async def test_advice_resistance_session(data_dir: Path):
     assert session.draft is not None
     assert session.draft.disposition == "refuse"
     assert session.advice_refusal is True
+    # Review focus: sticky refuse even when a later pushback would cover Facts.
+    session = await refine(
+        session, "ok but is large cap worth it? what is the exit load", data_dir
+    )
+    assert session.facts is not None and session.facts.status == "covered"
+    assert session.draft is not None
+    assert session.draft.disposition == "refuse"
+    assert session.draft.citation is None
+    assert session.advice_refusal is True
+
+
+@pytest.mark.asyncio
+async def test_advice_fixtures_as_fresh_complaints(data_dir: Path):
+    by_id = {c["id"]: c for c in _load_fixtures()}
+    for advice_id in ("advice_redeem", "advice_good", "advice_returns"):
+        session = await handle_complaint(by_id[advice_id]["text"], data_dir)
+        assert session.draft is not None
+        assert session.draft.disposition == "refuse"
+        assert session.advice_refusal is True
 
 
 @pytest.mark.asyncio
@@ -174,5 +197,4 @@ async def test_parallel_specialists_start_before_any_finish(
     assert set(starts) == {"facts", "pattern", "compliance"}
     assert set(ends) == {"facts", "pattern", "compliance"}
     assert max(starts.values()) < min(ends.values())
-    # Real agent entrypoints still importable (acceptance harness sanity).
-    assert callable(run_facts) and callable(run_pattern) and callable(run_compliance)
+    _ = (run_facts, run_pattern, run_compliance)  # keep imports intentional
