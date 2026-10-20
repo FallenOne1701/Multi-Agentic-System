@@ -16,6 +16,7 @@ These rules come from the problem statement and decide the shape below.
 6. A reply is at most **three sentences**, facts-only, with one citation link and a last-checked date. No citation means it does not ship.
 7. Reviewer rework is **one round**. Human refinement is **five rounds**. After a second reviewer failure, the draft is shown with the flag and **Send is not offered**.
 8. Nothing is appended or emailed until a human clicks **approve**. There is no auto-send.
+9. Each specialist may use its **own model call as a classifier only**. The model must not invent facts, URLs, review counts, or advice. Keyword/regex fallbacks remain when the model is disabled or fails. One model must not answer Facts, Pattern, and Compliance in a single call.
 
 ## System context
 
@@ -58,11 +59,11 @@ flowchart LR
 | Session state | Redacted message, agent outputs, draft, reviewer flags, agents fired, refinement count. | Orchestrator, reviewer, approval gate |
 | Support record and email draft | Written only after approval. | Approval gate |
 
-Agents do not scrape Groww, call a model for facts outside these files, or fetch new scheme pages.
+Agents do not scrape Groww, call a model for facts outside these files, or fetch new scheme pages. An optional classifier LLM (e.g. Groq) may help match scheme/section, theme, or compliance phrasing; answer text, citations, theme counts, signals, and PII tokens still come from code and `data/` only.
 
 ## Parallel fan-out
 
-The orchestrator is the only caller. It redacts first, starts the three agents together, waits until all three have returned, merges, then sends the draft to the reviewer. The same caller handles the first pass and every refinement, so there is one place that decides who runs.
+The three specialists are **LangGraph nodes** started together (parallel fan-out). The orchestrator is the only caller. It redacts first, starts the three agents together, waits until all three have returned, merges, then sends the draft to the reviewer. The same caller handles the first pass and every refinement, so there is one place that decides who runs.
 
 Ingress is not a dispatcher. It is a function the orchestrator calls, and it returns `redacted_text` plus `pii_types`. That string, and nothing else, is what the orchestrator hands to each agent. An agent never receives another agent's result.
 
@@ -117,7 +118,7 @@ Ingress also returns the list of token types found (`pii_types`), with no raw va
 
 **Reads:** the redacted complaint and `data/parsed/` only.
 
-**Does:** pick at most one of the five schemes, then the section that answers the question.
+**Does:** pick at most one of the five schemes, then the section that answers the question. Scheme/section selection may use an optional classifier LLM with keyword fallback. The answer sentence is always copied from the matched `text_block`; the model never authors the fact.
 
 | `scheme_id` | Name cues | Exit load in corpus |
 |---|---|---|
@@ -139,7 +140,7 @@ NAV, expense ratio, exit load, stamp duty, and the tax rule in the corpus are ci
 
 **Reads:** the redacted complaint, `data/analyzed_themes.json`, and review `date`s from `data/normalized_reviews.json` for the matched theme's `reviewIds`.
 
-**Does:** assign one theme from `allThemes`, not only `topThemes`. An exit-load or brokerage complaint maps to `fees_brokerage` even though that theme is outside `topThemes`.
+**Does:** assign one theme from `allThemes`, not only `topThemes`. Theme selection may use an optional classifier LLM with keyword fallback; `count`, `recent_count`, and `signal` are always computed from review dates in code. An exit-load or brokerage complaint maps to `fees_brokerage` even though that theme is outside `topThemes`.
 
 | `id` | Name | Count | Avg rating | In `topThemes` |
 |---|---|---:|---:|---|
@@ -167,9 +168,9 @@ The agent returns the theme `id`, `count` (full window), `recent_count`, `signal
 
 ### Compliance Agent
 
-**Reads:** the redacted complaint and the ingress `pii_types` list. It does not read the other agents and it does not see the draft.
+**Reads:** the redacted complaint and the ingress `pii_types` list. It does not read the other agents and it does not see the draft. Outgoing draft checks belong to the **reviewer**.
 
-**Flags on the input:**
+**Flags on the input:** Advice and performance flags may use an optional classifier LLM **OR**'d with phrase/regex rules (either hit is enough). PII flags stay ingress + residual regex; the model does not invent raw values.
 
 | Flag | What trips it |
 |---|---|

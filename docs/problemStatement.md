@@ -18,6 +18,8 @@ A support agent answering *"why was I charged an exit load"* needs three things 
 
 A single model asked to do all three does the first and forgets the rest. It writes a fluent, uncited paragraph ending in *"you may want to consider staying invested longer"*, which is advice. That turns a support ticket into a compliance problem.
 
+Each specialist gets its own model call. The model only classifies. Facts code copies the sentence from the scheme file, Pattern code counts the reviews, and Compliance / ingress code redacts PII. The three specialist calls are three nodes on one LangGraph, started together.
+
 ## Input
 
 The raw Play Store CSV is no longer in the repo. `data/` now holds the Milestone 1 corpus and the Milestone 2 review analysis. Agents read these files; they do not scrape or fall back on general knowledge.
@@ -72,7 +74,7 @@ None of them waits on or reads another's output.
 |---|---|---|
 | **Facts Agent** | Retrieves the answer from `data/parsed/` (the five scheme files). Does **not** fall back on general knowledge. | Answer with **one citation link** (`source_url`). If the corpus doesn't cover it, returns `"not covered"` and names which schemes and sections it searched. |
 | **Pattern Agent** | Checks the complaint against `allThemes` in `data/analyzed_themes.json`. | Whether the issue is **recurring**, **rising**, or a **one-off**, plus the theme `id`, the **count** of `reviewIds` behind it, and the **window** (2026-04-12 to 2026-07-04). |
-| **Compliance Agent** | Scans the incoming message **and** the outgoing draft for advice language, performance/return claims, and PII. | Flags and **redacts** PAN, Aadhaar, account numbers, phone numbers, emails, and OTPs **before anything is stored**. |
+| **Compliance Agent** | Scans the **incoming** message for advice language, performance/return claims, and PII. The **reviewer** applies the same policy to the **outgoing** draft after merge (the draft does not exist yet at fan-out). | Flags on the complaint. PII is **redacted at ingress** (PAN, Aadhaar, account numbers, phones, emails, OTPs) before anything is stored or fanned out. |
 
 ### Orchestrator
 
