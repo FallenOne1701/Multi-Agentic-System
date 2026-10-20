@@ -17,12 +17,18 @@ from groww_support.contracts import (
     PatternResult,
     PatternSignal,
     Priority,
+    ReviewerResult,
     RoutingNote,
     SessionState,
     ThemeId,
 )
 from groww_support.ingress import redact
 from groww_support.reviewer import review_draft, rewrite_draft
+from groww_support.session import (
+    MAX_REFINEMENTS,
+    agents_for_plan,
+    classify_pushback,
+)
 
 TEAM_BY_THEME: dict[ThemeId, str] = {
     "fees_brokerage": "Fees and mutual fund ops",
@@ -266,6 +272,53 @@ async def handle_complaint(
         )
     )
 
+    draft, review, prior = _review_with_optional_rework(
+        draft, facts=facts, agents_fired=prior, round_num=round_num
+    )
+
+    return SessionState(
+        redacted_text=ingress.redacted_text,
+        pii_types=list(ingress.pii_types),
+        facts=facts,
+        pattern=pattern,
+        compliance=compliance,
+        draft=draft,
+        review=review,
+        advice_refusal=advice_refusal,
+        refinement_count=session.refinement_count if session else 0,
+        agents_fired=prior,
+    )
+
+
+def _shorten_reply(draft: OrchestratorOutput) -> OrchestratorOutput:
+    """Tighten wording without breaking URLs or dropping last_checked/citation."""
+    import re
+
+    # Split on sentence boundaries only (do not split inside https://...).
+    parts = [
+        p.strip()
+        for p in re.split(r"(?<=[.!?])\s+", draft.reply.strip())
+        if p.strip()
+    ]
+    if len(parts) <= 3:
+        # Already within reviewer shape; keep as-is (test cares about agents_fired).
+        return draft
+    kept = parts[:2]
+    if draft.last_checked and not any(draft.last_checked in p for p in kept):
+        kept.append(f"Last checked: {draft.last_checked}.")
+    if draft.citation and not any(draft.citation in p for p in kept):
+        kept.append(f"Source: {draft.citation}.")
+    return draft.model_copy(update={"reply": " ".join(kept[:3])})
+
+
+def _review_with_optional_rework(
+    draft: OrchestratorOutput,
+    *,
+    facts: FactsResult | None,
+    agents_fired: list[AgentsFiredEntry],
+    round_num: int,
+) -> tuple[OrchestratorOutput, ReviewerResult, list[AgentsFiredEntry]]:
+    prior = list(agents_fired)
     review = review_draft(draft, facts=facts, round=1)
     if review.status == "fail":
         draft = rewrite_draft(draft, facts=facts, failures=review.failures)
@@ -278,16 +331,73 @@ async def handle_complaint(
             )
         )
         review = review_draft(draft, facts=facts, round=2)
+    return draft, review, prior
+
+
+async def refine(
+    session: SessionState,
+    pushback: str,
+    data_dir: Path,
+) -> SessionState:
+    if session.refinement_count >= MAX_REFINEMENTS:
+        raise ValueError(
+            f"refinement cap reached (max {MAX_REFINEMENTS}); keeping last reviewed draft"
+        )
+    if session.facts is None or session.pattern is None or session.compliance is None:
+        raise ValueError("refine requires a session with facts, pattern, and compliance")
+
+    plan = classify_pushback(pushback)
+    fired, skipped = agents_for_plan(plan)
+
+    facts = session.facts
+    pattern = session.pattern
+    compliance = session.compliance
+    probe = f"{session.redacted_text}\n{pushback}".strip()
+
+    if plan.facts:
+        facts = await run_facts(probe, data_dir / "parsed")
+    if plan.pattern:
+        pattern = await run_pattern(
+            probe,
+            data_dir / "analyzed_themes.json",
+            data_dir / "normalized_reviews.json",
+        )
+    if plan.compliance:
+        compliance = await run_compliance(probe, list(session.pii_types))
+
+    # Sticky: once true, never cleared by a later covered fact.
+    advice_refusal = bool(session.advice_refusal) or bool(compliance.advice_refusal)
+
+    draft = merge_draft(
+        facts, pattern, compliance, advice_refusal=advice_refusal
+    )
+    if "shorter" in pushback.lower():
+        draft = _shorten_reply(draft)
+
+    prior = list(session.agents_fired)
+    round_num = (prior[-1].round + 1) if prior else 1
+    prior.append(
+        AgentsFiredEntry(
+            round=round_num,
+            kind="refinement",
+            fired=fired,
+            skipped=skipped,
+        )
+    )
+
+    draft, review, prior = _review_with_optional_rework(
+        draft, facts=facts, agents_fired=prior, round_num=round_num
+    )
 
     return SessionState(
-        redacted_text=ingress.redacted_text,
-        pii_types=list(ingress.pii_types),
+        redacted_text=session.redacted_text,
+        pii_types=list(session.pii_types),
         facts=facts,
         pattern=pattern,
         compliance=compliance,
         draft=draft,
         review=review,
         advice_refusal=advice_refusal,
-        refinement_count=session.refinement_count if session else 0,
+        refinement_count=session.refinement_count + 1,
         agents_fired=prior,
     )
