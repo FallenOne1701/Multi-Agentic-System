@@ -5,6 +5,7 @@ from datetime import date, datetime
 from pathlib import Path
 
 from groww_support.contracts import DateWindow, PatternResult, PatternSignal, ThemeId
+from groww_support.llm import classify_theme, llm_enabled
 
 WINDOW_START = date(2026, 4, 12)
 WINDOW_END = date(2026, 7, 4)
@@ -55,6 +56,10 @@ async def run_pattern(redacted_text: str, themes_path: Path, reviews_path: Path)
     themes_data = json.loads(themes_path.read_text(encoding="utf-8"))
     themes_by_id = {theme["id"]: theme for theme in themes_data["allThemes"]}
     theme_id = _match_theme(redacted_text)
+    if llm_enabled():
+        classified = await classify_theme(redacted_text)
+        if classified is not None and classified.theme_id in themes_by_id:
+            theme_id = classified.theme_id
     theme = themes_by_id[theme_id]
 
     reviews_by_id = {

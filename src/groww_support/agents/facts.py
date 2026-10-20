@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from groww_support.contracts import FactsResult, SchemeId
+from groww_support.llm import classify_facts, llm_enabled
 
 SCHEME_CUES: list[tuple[SchemeId, tuple[str, ...]]] = [
     ("large_cap", ("large cap", "large-cap")),
@@ -75,6 +76,14 @@ def _section_text(data: dict, section_title: str) -> str | None:
 async def run_facts(redacted_text: str, parsed_dir: Path) -> FactsResult:
     scheme_id = _match_scheme(redacted_text)
     section_title = _match_section(redacted_text)
+
+    if llm_enabled():
+        classified = await classify_facts(redacted_text)
+        if classified is not None:
+            if classified.scheme_id is not None:
+                scheme_id = classified.scheme_id
+            if classified.section_title is not None:
+                section_title = classified.section_title
 
     if scheme_id is not None and section_title is not None:
         data = _load_scheme(parsed_dir, scheme_id)

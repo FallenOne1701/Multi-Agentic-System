@@ -5,6 +5,7 @@ from typing import Literal
 
 from groww_support.contracts import ComplianceResult, PiiType
 from groww_support.ingress import redact
+from groww_support.llm import classify_compliance, llm_enabled
 
 Flag = Literal["advice", "performance_claim", "pii"]
 
@@ -45,6 +46,13 @@ async def run_compliance(redacted_text: str, pii_types: list[PiiType]) -> Compli
     flags: list[Flag] = []
     advice = _detect_advice(redacted_text)
     performance = _detect_performance(redacted_text)
+
+    # OR with Groq so phrasing the regex misses still flags, without dropping keyword hits.
+    if llm_enabled():
+        classified = await classify_compliance(redacted_text)
+        if classified is not None:
+            advice = advice or classified.advice
+            performance = performance or classified.performance_claim
 
     if advice:
         flags.append("advice")
