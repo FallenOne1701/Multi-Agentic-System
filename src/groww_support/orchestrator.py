@@ -22,6 +22,7 @@ from groww_support.contracts import (
     ThemeId,
 )
 from groww_support.ingress import redact
+from groww_support.reviewer import review_draft, rewrite_draft
 
 TEAM_BY_THEME: dict[ThemeId, str] = {
     "fees_brokerage": "Fees and mutual fund ops",
@@ -265,6 +266,19 @@ async def handle_complaint(
         )
     )
 
+    review = review_draft(draft, facts=facts, round=1)
+    if review.status == "fail":
+        draft = rewrite_draft(draft, facts=facts, failures=review.failures)
+        prior.append(
+            AgentsFiredEntry(
+                round=round_num,
+                kind="reviewer_rework",
+                fired=["orchestrator"],
+                skipped=["facts", "pattern", "compliance"],
+            )
+        )
+        review = review_draft(draft, facts=facts, round=2)
+
     return SessionState(
         redacted_text=ingress.redacted_text,
         pii_types=list(ingress.pii_types),
@@ -272,7 +286,7 @@ async def handle_complaint(
         pattern=pattern,
         compliance=compliance,
         draft=draft,
-        review=session.review if session else None,
+        review=review,
         advice_refusal=advice_refusal,
         refinement_count=session.refinement_count if session else 0,
         agents_fired=prior,
