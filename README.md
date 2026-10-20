@@ -10,6 +10,26 @@ python -m venv .venv
 # source .venv/bin/activate && pip install -e ".[dev]"  # macOS/Linux
 ```
 
+Optional classifier LLM: copy `.env.example` to `.env` and set `GROQ_API_KEY` / `GROQ_MODEL`. Set `GROWW_USE_LLM=0` for offline keyword/regex fallbacks (default in tests).
+
+## CLI
+
+```bash
+# One-shot fan-out (writes output/session.json)
+groww-support run "Why was I charged an exit load on HDFC Large Cap Fund?"
+
+# Selective refinement
+groww-support refine output/session.json "make it shorter"
+
+# Approve only when reviewer status is pass (appends record + email draft; no send)
+groww-support approve output/session.json
+
+# Interactive: complaint → refine / approve / quit
+groww-support
+```
+
+Approve is disabled when `review.status != "pass"`.
+
 ## Tests
 
 ```bash
