@@ -1,6 +1,6 @@
 # Groww Multi-Agent Support Reply System — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a parallel multi-agent support reply system that drafts a facts-only, citation-backed, approval-gated email reply for Groww user complaints from `data/` only.
 
@@ -93,7 +93,7 @@ multi-agentic-system/
 - Consumes: none
 - Produces: installable package `groww_support`, pytest runnable from repo root
 
-- [ ] **Step 1: Write `pyproject.toml`**
+- [x] **Step 1: Write `pyproject.toml`**
 
 ```toml
 [build-system]
@@ -125,7 +125,7 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 ```
 
-- [ ] **Step 2: Write `.gitignore`**
+- [x] **Step 2: Write `.gitignore`**
 
 ```
 __pycache__/
@@ -140,7 +140,7 @@ build/
 .env
 ```
 
-- [ ] **Step 3: Write minimal package init and conftest**
+- [x] **Step 3: Write minimal package init and conftest**
 
 ```python
 # src/groww_support/__init__.py
@@ -164,12 +164,12 @@ def parsed_dir(data_dir: Path) -> Path:
     return data_dir / "parsed"
 ```
 
-- [ ] **Step 4: Install and verify pytest collects zero tests cleanly**
+- [x] **Step 4: Install and verify pytest collects zero tests cleanly**
 
 Run: `python -m venv .venv; .\.venv\Scripts\pip install -e ".[dev]"; .\.venv\Scripts\pytest -q`
 Expected: `no tests ran` or `0 passed` with exit 0 / no import errors.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add pyproject.toml .gitignore README.md src/groww_support/__init__.py tests/conftest.py
@@ -188,7 +188,7 @@ git commit -m "chore: scaffold groww-support package and pytest"
 - Consumes: none
 - Produces: `FactsResult`, `PatternResult`, `ComplianceResult`, `OrchestratorOutput`, `RoutingNote`, `ReviewerResult`, `ReviewerFailure`, `SessionState`, `AgentsFiredEntry`
 
-- [ ] **Step 1: Write failing contract round-trip test**
+- [x] **Step 1: Write failing contract round-trip test**
 
 ```python
 # tests/test_contracts.py
@@ -222,12 +222,12 @@ def test_facts_result_not_covered_nulls_fact_and_citation():
     assert model.citation is None
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/test_contracts.py -v`
 Expected: FAIL with `ModuleNotFoundError` or `ImportError: cannot import name 'FactsResult'`
 
-- [ ] **Step 3: Implement contracts**
+- [x] **Step 3: Implement contracts**
 
 ```python
 # src/groww_support/contracts.py
@@ -325,12 +325,12 @@ class SessionState(BaseModel):
     # raw user string is intentionally absent
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/test_contracts.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/contracts.py tests/test_contracts.py
@@ -352,7 +352,7 @@ git commit -m "feat: add pydantic data contracts for agent and session outputs"
 - Consumes: raw complaint `str`
 - Produces: `IngressResult(redacted_text: str, pii_types: list[PiiType])` via `redact(raw: str) -> IngressResult`
 
-- [ ] **Step 1: Write failing tests for each PII class**
+- [x] **Step 1: Write failing tests for each PII class**
 
 ```python
 # tests/test_ingress.py
@@ -388,12 +388,12 @@ def test_clean_complaint_unchanged():
     assert r.pii_types == []
 ```
 
-- [ ] **Step 2: Run tests — expect fail**
+- [x] **Step 2: Run tests — expect fail**
 
 Run: `pytest tests/test_ingress.py -v`
 Expected: FAIL import / not defined
 
-- [ ] **Step 3: Implement ingress + redacted logger**
+- [x] **Step 3: Implement ingress + redacted logger**
 
 ```python
 # src/groww_support/ingress.py
@@ -453,12 +453,12 @@ def log_event(logger: logging.Logger, event: str, **fields: object) -> None:
     logger.info("%s %s", event, safe)
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/test_ingress.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/ingress.py src/groww_support/logging_util.py tests/test_ingress.py
@@ -482,7 +482,7 @@ git commit -m "feat: add deterministic PII ingress redaction"
 - Consumes: `redacted_text: str`, `parsed_dir: Path`
 - Produces: `async def run_facts(redacted_text: str, parsed_dir: Path) -> FactsResult`
 
-- [ ] **Step 1: Write failing tests for covered / not_covered**
+- [x] **Step 1: Write failing tests for covered / not_covered**
 
 ```python
 # tests/test_facts.py
@@ -527,12 +527,12 @@ async def test_does_not_invent_returns(parsed_dir):
     )
 ```
 
-- [ ] **Step 2: Run tests — expect fail**
+- [x] **Step 2: Run tests — expect fail**
 
 Run: `pytest tests/test_facts.py -v`
 Expected: FAIL import
 
-- [ ] **Step 3: Implement Facts Agent**
+- [x] **Step 3: Implement Facts Agent**
 
 Optional: call shared `classify_facts` when LLM enabled; else (or on failure) match scheme by name cues (`HDFC Large Cap`, `Mid Cap`, `Small Cap`, `Gold ETF`, `Silver ETF`). Match section by keyword map:
 
@@ -577,12 +577,12 @@ async def run_facts(redacted_text: str, parsed_dir: Path) -> FactsResult:
     ...
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `pytest tests/test_facts.py -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/agents/facts.py src/groww_support/agents/__init__.py tests/test_facts.py
@@ -609,7 +609,7 @@ git commit -m "feat: add Facts Agent over data/parsed corpus"
 - `rising`: not other, count ≥ 20, and recent_count ≥ 40 OR recent_count ≥ 2× weekly rate of earlier slice
 - `recurring`: not other, count ≥ 20, not rising
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/test_pattern.py
@@ -652,11 +652,11 @@ async def test_other_theme_is_one_off(data_dir: Path):
     assert result.signal == "one-off"
 ```
 
-- [ ] **Step 2: Run — expect fail**
+- [x] **Step 2: Run — expect fail**
 
 Run: `pytest tests/test_pattern.py -v`
 
-- [ ] **Step 3: Implement Pattern Agent**
+- [x] **Step 3: Implement Pattern Agent**
 
 1. Load `allThemes` (not only `topThemes`).
 2. Optional: shared `classify_theme` when LLM enabled; else (or on failure) score themes by keyword overlap (map: fees/exit load/brokerage → `fees_brokerage`; withdraw/deposit/payment → `money_movement`; crash/lag/hang → `reliability`; chart/order/trade → `trading_charts`; else `other`).
@@ -664,9 +664,9 @@ Run: `pytest tests/test_pattern.py -v`
 4. Count full window and recent slice; compute signal **in code** (model must not invent counts).
 5. Return `PatternResult`.
 
-- [ ] **Step 4: Run tests — PASS**
+- [x] **Step 4: Run tests — PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/agents/pattern.py tests/test_pattern.py
@@ -685,7 +685,7 @@ git commit -m "feat: add Pattern Agent with recurring/rising/one-off signals"
 - Consumes: `redacted_text: str`, `pii_types: list[PiiType]`
 - Produces: `async def run_compliance(redacted_text: str, pii_types: list[PiiType]) -> ComplianceResult`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/test_compliance.py
@@ -717,15 +717,15 @@ async def test_clean_exit_load_no_flags():
     assert r.advice_refusal is False
 ```
 
-- [ ] **Step 2: Run — expect fail**
+- [x] **Step 2: Run — expect fail**
 
-- [ ] **Step 3: Implement Compliance Agent**
+- [x] **Step 3: Implement Compliance Agent**
 
 **Incoming only** (outgoing draft → Task 8 Reviewer). Detect advice phrases: `should I`, `redeem or not`, `is this scheme good`, `should I stay`, `worth it`, `buy`, `sell`, `hold` (investment context). Detect performance: `return`, `CAGR`, `performance`, `% return`. Optional: shared `classify_compliance` **OR**'d with those rules (either hit flags). PII flag if `pii_types` non-empty OR residual raw patterns still match (defense in depth). Never echo raw values; keep `redacted_text` as given.
 
-- [ ] **Step 4: Run tests — PASS**
+- [x] **Step 4: Run tests — PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/agents/compliance.py tests/test_compliance.py
@@ -763,7 +763,7 @@ git commit -m "feat: add Compliance Agent for advice, performance, and PII flags
 | advice or performance_claim | `refuse` |
 | covered + rising/high recent on same issue | `disagree` (`disagreement=True`) |
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/test_orchestrator.py
@@ -861,9 +861,9 @@ async def test_parallel_fanout_records_all_three(data_dir: Path):
 
 Also add a unit test that instruments start timestamps (monkeypatch agents to `asyncio.sleep` then return) and asserts all three start times are recorded before any end time — this pins the parallel rule.
 
-- [ ] **Step 2: Run — expect fail**
+- [x] **Step 2: Run — expect fail**
 
-- [ ] **Step 3: Implement orchestrator**
+- [x] **Step 3: Implement orchestrator**
 
 Critical fan-out shape (LangGraph; sketch):
 
@@ -887,9 +887,9 @@ async def handle_complaint(raw: str, data_dir: Path, session: SessionState | Non
 
 Team map and priority map exactly as in `docs/architecture.md`.
 
-- [ ] **Step 4: Run tests — PASS**
+- [x] **Step 4: Run tests — PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/orchestrator.py tests/test_orchestrator.py
@@ -914,7 +914,7 @@ git commit -m "feat: add orchestrator parallel fan-out, disposition, and draft m
 
 **Hard fails:** citation, advice, performance, pii, shape (≤3 sentences; covered requires last_checked).
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/test_reviewer.py
@@ -977,15 +977,15 @@ def test_clean_covered_draft_passes():
     assert result.status == "pass"
 ```
 
-- [ ] **Step 2: Run — expect fail**
+- [x] **Step 2: Run — expect fail**
 
-- [ ] **Step 3: Implement reviewer + wire one rework in orchestrator**
+- [x] **Step 3: Implement reviewer + wire one rework in orchestrator**
 
 On fail round 1, `rewrite_draft` strips advice phrases, restores citation from Facts if missing, truncates to 3 sentences, replaces residual PII via `redact`. Do **not** re-run Facts/Pattern/Compliance for reviewer rework. Log `agents_fired` with `kind="reviewer_rework"`, `fired=["orchestrator"]`.
 
-- [ ] **Step 4: Run tests — PASS**
+- [x] **Step 4: Run tests — PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/reviewer.py src/groww_support/orchestrator.py tests/test_reviewer.py
@@ -1017,7 +1017,7 @@ git commit -m "feat: add reviewer hard fails and single rework round"
 
 Sixth pushback: refuse, keep last reviewed draft. Reviewer still gets one rework per new draft; that rework does not increment `refinement_count`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/test_session_refinement.py
@@ -1058,15 +1058,15 @@ async def test_sixth_refinement_rejected(data_dir):
         await refine(session, "Shorter again", data_dir)
 ```
 
-- [ ] **Step 2: Run — expect fail**
+- [x] **Step 2: Run — expect fail**
 
-- [ ] **Step 3: Implement session helpers + `refine`**
+- [x] **Step 3: Implement session helpers + `refine`**
 
 Classify pushback with simple keyword rules; re-run only named agents; set sticky `advice_refusal`; append `AgentsFiredEntry`; re-run reviewer path.
 
-- [ ] **Step 4: Run tests — PASS**
+- [x] **Step 4: Run tests — PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/session.py src/groww_support/orchestrator.py tests/test_session_refinement.py
@@ -1090,7 +1090,7 @@ git commit -m "feat: add session state and selective refinement (max 5)"
 
 Record fields: complaint tokens (`redacted_text`), disposition, reply, citation, last_checked, routing_note, pattern signal, `agents_fired`. No raw PII.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```python
 # tests/test_approval.py
@@ -1128,9 +1128,9 @@ def test_blocked_cannot_approve(tmp_path, data_dir):
         approve(session, tmp_path)
 ```
 
-- [ ] **Step 2: Run — expect fail**
+- [x] **Step 2: Run — expect fail**
 
-- [ ] **Step 3: Implement approval gate**
+- [x] **Step 3: Implement approval gate**
 
 ```python
 # src/groww_support/approval.py
@@ -1176,9 +1176,9 @@ def approve(session: SessionState, output_dir: Path) -> ApprovalArtifacts:
     return ApprovalArtifacts(record_id=record_id, record_path=record_path, email_path=email_path)
 ```
 
-- [ ] **Step 4: Run tests — PASS**
+- [x] **Step 4: Run tests — PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/groww_support/approval.py tests/test_approval.py

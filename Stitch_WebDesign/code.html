@@ -1,0 +1,311 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Groww Support Reply - New Complaint Workbench</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-tint": "#006c4f",
+            "error": "#ba1a1a",
+            "state-warn-border": "#FDE68A",
+            "surface-bg": "#F8FAFC",
+            "surface-panel": "#FFFFFF",
+            "on-tertiary": "#ffffff",
+            "surface": "#fbf8ff",
+            "border-strong": "#CBD5E1",
+            "primary-fixed-dim": "#50ddad",
+            "surface-container-lowest": "#ffffff",
+            "state-pass-dot": "#00B386",
+            "surface-container-low": "#f3f2ff",
+            "text-tertiary": "#6B7280",
+            "state-danger-border": "#FECACA",
+            "state-warn-bg": "#FFFBEB",
+            "state-danger-bg": "#FEF2F2",
+            "text-secondary": "#4B5563",
+            "on-surface": "#171a2c",
+            "state-warn-dot": "#F59E0B",
+            "primary": "#006c4f",
+            "on-secondary-fixed-variant": "#102bcd",
+            "outline": "#6c7a73",
+            "surface-variant": "#dfe1fa",
+            "on-tertiary-fixed": "#410002",
+            "state-danger-text": "#991B1B",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#003d2c",
+            "border-subtle": "#E2E8F0",
+            "on-secondary": "#ffffff",
+            "surface-container-high": "#e5e6ff",
+            "secondary-fixed-dim": "#bcc2ff",
+            "secondary": "#3247e2",
+            "state-pass-text": "#065F46",
+            "inverse-primary": "#50ddad",
+            "tertiary-fixed-dim": "#ffb4ab",
+            "on-error": "#ffffff",
+            "state-pass-border": "#A7F3D0",
+            "state-warn-text": "#92400E",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#822620",
+            "tertiary": "#a23d35",
+            "text-primary": "#111827",
+            "secondary-container": "#4f63fb",
+            "redaction-text": "#38BDF8",
+            "secondary-fixed": "#dfe0ff",
+            "on-secondary-fixed": "#000b62",
+            "on-tertiary-container": "#691411",
+            "background": "#fbf8ff",
+            "on-primary-fixed-variant": "#00513b",
+            "on-surface-variant": "#3c4a43",
+            "on-primary": "#ffffff",
+            "state-danger-dot": "#E11D48",
+            "tertiary-container": "#f27a6e",
+            "state-pass-bg": "#ECFDF5",
+            "primary-container": "#00b386",
+            "inverse-on-surface": "#f0efff",
+            "outline-variant": "#bbcac1",
+            "surface-dim": "#d7d8f1",
+            "surface-container-highest": "#dfe1fa",
+            "on-primary-fixed": "#002116",
+            "redaction-bg": "#1E293B",
+            "on-secondary-container": "#fffbff",
+            "surface-container": "#ececff",
+            "surface-bright": "#fbf8ff",
+            "primary-fixed": "#71fac8",
+            "on-background": "#171a2c",
+            "inverse-surface": "#2c2f42",
+            "tertiary-fixed": "#ffdad6"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "1.25rem",
+            "space-lg": "1rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-md": "0.75rem"
+          },
+          "fontFamily": {
+            "label-token": ["JetBrains Mono"],
+            "body-md": ["Inter"],
+            "headline-lg": ["Geist"],
+            "label-caps": ["Inter"],
+            "body-xs": ["Inter"],
+            "headline-sm": ["Geist"],
+            "body-sm": ["Inter"],
+            "label-code": ["JetBrains Mono"],
+            "headline-md": ["Geist"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-token": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+            "body-xs": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-code": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      font-size: 18px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body class="bg-surface-bg text-text-primary antialiased font-body-md h-full flex flex-col overflow-x-hidden selection:bg-state-pass-border selection:text-state-pass-text">
+<!-- Top Operational Header (Shared Component: TopNavBar Anchor) -->
+<header class="bg-surface-panel flex items-center justify-between px-space-xl py-space-sm w-full border-b border-border-subtle shrink-0">
+<!-- Brandmark & Tagline Cluster -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-sm">
+<div class="w-6 h-6 rounded bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; font-size: 16px;">shield</span>
+</div>
+<span class="text-headline-sm font-headline-sm font-semibold text-text-primary">Groww Support Reply</span>
+</div>
+<div class="h-4 w-px bg-border-subtle"></div>
+<span class="text-body-xs font-body-xs text-text-tertiary">Facts-only drafts. Human approve.</span>
+<!-- In-header Quick Context Navigation -->
+<nav class="hidden lg:flex items-center gap-space-lg ml-space-md">
+<a class="text-primary font-semibold border-b-2 border-primary pb-1 text-body-sm font-body-sm" href="#">Queue</a>
+<a class="text-text-secondary font-medium pb-1 text-body-sm font-body-sm hover:text-text-primary transition-colors duration-150" href="#">Cluster Stats</a>
+<a class="text-text-secondary font-medium pb-1 text-body-sm font-body-sm hover:text-text-primary transition-colors duration-150" href="#">Audit Log</a>
+<a class="text-text-secondary font-medium pb-1 text-body-sm font-body-sm hover:text-text-primary transition-colors duration-150" href="#">Policies</a>
+</nav>
+</div>
+<!-- Agent Identity Badge & Utility Cluster -->
+<div class="flex items-center gap-space-md">
+<!-- Search on Left of Trailing Cluster -->
+<div class="relative hidden sm:flex items-center">
+<span class="material-symbols-outlined absolute left-2 text-text-tertiary pointer-events-none" style="font-size: 16px;">search</span>
+<input class="pl-8 pr-3 py-1 bg-surface-bg border border-border-subtle rounded text-body-xs font-body-xs text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-1 focus:ring-primary-container focus:border-primary-container w-48" placeholder="Search ticket # or PAN..." type="text">
+</div>
+<div class="flex items-center gap-space-xs text-text-secondary">
+<button class="p-1.5 rounded hover:bg-surface-bg hover:text-text-primary transition-colors duration-150" title="System Notifications">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-bg hover:text-text-primary transition-colors duration-150" title="Security &amp; Shield State">
+<span class="material-symbols-outlined">shield</span>
+</button>
+<button class="p-1.5 rounded hover:bg-surface-bg hover:text-text-primary transition-colors duration-150" title="Support Knowledge Desk">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="h-4 w-px bg-border-subtle"></div>
+<!-- Agent Operational Badge Profile -->
+<div class="flex items-center gap-space-sm pl-space-xs">
+<div class="w-7 h-7 rounded-full bg-slate-200 border border-border-subtle flex items-center justify-center font-label-code text-label-code text-text-secondary overflow-hidden">
+          RM
+        </div>
+<div class="flex flex-col text-left">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-state-pass-dot"></span>
+<span class="text-body-xs font-body-xs font-semibold text-text-primary">Agent: Rahul M.</span>
+</div>
+<span class="text-label-caps font-label-caps text-text-tertiary">Tier 2 Mutual Funds</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Rules & Regulatory Banner -->
+
+<!-- Primary Workbench Canvas -->
+<main class="flex-1 overflow-y-auto px-space-xl py-space-xl flex justify-center items-start">
+<div class="w-full max-w-[820px] flex flex-col gap-space-lg">
+<!-- Breadcrumbs & Operational Context -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2 text-text-tertiary text-body-xs font-body-xs">
+<span class="">Workbench</span>
+<span class="material-symbols-outlined" style="font-size: 14px;">chevron_right</span>
+<span class="">Intake</span>
+<span class="material-symbols-outlined" style="font-size: 14px;">chevron_right</span>
+<span class="text-text-primary font-medium">New Complaint Intake</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 text-label-caps font-label-caps px-2 py-0.5 rounded bg-state-pass-bg border border-state-pass-border text-state-pass-text">
+<span class="w-1.5 h-1.5 rounded-full bg-state-pass-dot"></span>
+            PII ENGINE: ONLINE
+          </span>
+<span class="text-label-code font-label-code text-text-tertiary">v4.18.2-prod</span>
+</div>
+</div>
+<!-- Main Central Workbench Panel -->
+<section class="bg-surface-panel border border-border-subtle rounded-xl p-space-xl flex flex-col gap-space-lg shadow-sm">
+<!-- Section Header -->
+<div class="flex flex-col gap-1 border-b border-border-subtle pb-space-md"><h1 class="text-headline-md font-headline-md font-semibold text-text-primary tracking-tight">New Customer Complaint</h1><p class="text-body-sm font-body-sm text-text-secondary">Paste raw ticket or customer query below to initiate automated factual analysis and draft generation.</p></div>
+<!-- Quick Load Chip & Presets Bar -->
+<div class="flex items-center justify-between flex-wrap gap-2 pt-1"><div class="flex items-center gap-2"><span class="text-body-xs font-body-xs text-text-tertiary">Sample query:</span><button class="inline-flex items-center gap-1.5 text-body-xs font-body-xs text-text-primary bg-surface-bg border border-border-subtle hover:border-border-strong px-2.5 py-1 rounded transition-colors group" id="sample-chip-btn"><span class="italic text-text-secondary group-hover:text-primary transition-colors">"Why was I charged an exit load on HDFC Large Cap?"</span></button></div></div>
+<!-- Input Area Container with Token Redaction Visualizer -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between text-body-xs font-body-xs">
+<label class="font-medium text-text-primary flex items-center gap-1.5" for="complaint-textarea">
+<span class="">Customer Query Raw Intake</span>
+<span class="text-state-danger-text">*</span>
+</label>
+<div class="flex items-center gap-3 text-text-tertiary">
+<span class="font-label-code text-label-code">Tokens: <span id="token-count" class="">56</span></span>
+<span class="font-label-code text-label-code">Chars: <span id="char-count" class="">242</span></span>
+</div>
+</div>
+<div class="relative rounded border border-border-subtle focus-within:border-primary-container focus-within:ring-2 focus-within:ring-primary-container/20 transition-all bg-surface-panel">
+<textarea class="w-full p-space-md text-body-md font-body-md text-text-primary bg-transparent border-0 focus:ring-0 resize-y leading-relaxed outline-none" id="complaint-textarea" placeholder="Paste customer complaint..." rows="6">Hello Groww team, I noticed a 1% exit load deduction on my recent redemption of HDFC Large Cap Fund Direct Plan-Growth. My folio is [FOLIO] and registered PAN is [PAN]. Can you clarify why this was applied and what the official policy states?</textarea>
+<!-- Contextual Redaction Badges In-Editor Preview -->
+<div class="px-space-md pb-space-sm pt-1 border-t border-border-subtle/60 flex items-center justify-between bg-surface-bg/50"><span class="text-label-caps font-label-caps text-text-tertiary">PII auto-detected: <span class="font-label-token text-text-secondary">[FOLIO]</span>, <span class="font-label-token text-text-secondary">[PAN]</span></span><span class="text-label-caps font-label-caps text-state-pass-text flex items-center gap-1"><span class="material-symbols-outlined text-state-pass-dot" style="font-size: 14px; font-variation-settings: 'FILL' 1;">check_circle</span>Masking active</span></div>
+</div>
+</div>
+<!-- Notice Callout: PII Protection Active -->
+<div class="bg-surface-bg border border-border-subtle rounded-lg p-space-md flex items-start gap-space-md"><div class="flex items-center gap-2 text-text-secondary text-body-xs font-body-xs"><span class="material-symbols-outlined text-state-pass-dot shrink-0" style="font-size: 16px; font-variation-settings: 'FILL' 1;">shield</span><span class="">PII is automatically redacted before running agents (typical wait 10–30s).</span></div></div>
+<!-- Primary CTA Bar & Secondary Actions -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-xs border-t border-border-subtle"><div class="flex items-center gap-space-sm w-full sm:w-auto"><button class="w-full sm:w-auto inline-flex items-center justify-center gap-space-sm bg-primary-container hover:bg-[#009E77] active:bg-[#008765] text-white px-space-lg py-2.5 rounded font-medium text-body-md transition-all shadow-sm" id="run-pipeline-btn"><span class="material-symbols-outlined" style="font-size: 18px; font-variation-settings: 'FILL' 1;">bolt</span><span class="">Run agents</span></button></div><div class="flex items-center gap-space-sm"><button class="px-space-md py-2 rounded text-body-sm font-body-sm text-text-secondary hover:text-state-danger-text hover:bg-state-danger-bg transition-colors" id="clear-intake-btn">Clear intake</button></div></div>
+</section>
+<!-- Bottom Pipeline Workflow Architecture Panel -->
+
+<!-- Keyboard shortcuts footnote -->
+
+</div>
+</main>
+<!-- Interactive State Scripts -->
+<script>
+    const textarea = document.getElementById('complaint-textarea');
+    const tokenCount = document.getElementById('token-count');
+    const charCount = document.getElementById('char-count');
+    const sampleBtn = document.getElementById('sample-chip-btn');
+    const clearBtn = document.getElementById('clear-intake-btn');
+    const runBtn = document.getElementById('run-pipeline-btn');
+
+    function updateMetrics() {
+      const val = textarea.value;
+      charCount.textContent = val.length;
+      // Rough token approximation (1 token ≈ 4 characters or word-split)
+      const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+      tokenCount.textContent = Math.round(words * 1.3);
+    }
+
+    textarea.addEventListener('input', updateMetrics);
+
+    sampleBtn.addEventListener('click', () => {
+      textarea.value = 'Hello Groww team, I noticed a 1% exit load deduction on my recent redemption of HDFC Large Cap Fund Direct Plan-Growth. My folio is [FOLIO] and registered PAN is [PAN]. Can you clarify why this was applied and what the official policy states?';
+      updateMetrics();
+      textarea.focus();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      textarea.value = '';
+      updateMetrics();
+      textarea.focus();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runBtn.click();
+      }
+    });
+
+    runBtn.addEventListener('click', () => {
+      const origText = runBtn.innerHTML;
+      runBtn.disabled = true;
+      runBtn.innerHTML = `
+        <span class="material-symbols-outlined animate-spin" style="font-size: 18px;">progress_activity</span>
+        <span>Initializing Pipeline Agents...</span>
+      `;
+      setTimeout(() => {
+        runBtn.innerHTML = `
+          <span class="material-symbols-outlined" style="font-size: 18px;">check</span>
+          <span>Pipeline In Flight (4 Agents Active)</span>
+        `;
+        runBtn.classList.remove('bg-primary-container');
+        runBtn.classList.add('bg-state-pass-text');
+      }, 1200);
+    });
+
+    // Initial calculation
+    updateMetrics();
+  </script>
+
+
+</body></html>
