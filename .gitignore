@@ -8,3 +8,7 @@ output/
 dist/
 build/
 .env
+web/.env.local
+web/.env*.local
+web/node_modules/
+web/.next/

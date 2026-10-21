@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-headline: var(--font-geist);
+  --font-mono: var(--font-jetbrains);
+
+  --color-surface-bg: #f8fafc;
+  --color-surface-panel: #ffffff;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #6b7280;
+  --color-border-subtle: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-primary: #006c4f;
+  --color-primary-container: #00b386;
+  --color-on-primary: #ffffff;
+  --color-state-pass-bg: #ecfdf5;
+  --color-state-pass-border: #a7f3d0;
+  --color-state-pass-text: #065f46;
+  --color-state-pass-dot: #00b386;
+  --color-state-warn-bg: #fffbeb;
+  --color-state-warn-border: #fde68a;
+  --color-state-warn-text: #92400e;
+  --color-state-warn-dot: #f59e0b;
+  --color-state-danger-bg: #fef2f2;
+  --color-state-danger-border: #fecaca;
+  --color-state-danger-text: #991b1b;
+  --color-state-danger-dot: #e11d48;
+  --color-redaction-bg: #1e293b;
+  --color-redaction-text: #38bdf8;
+}
+
+html,
+body {
+  background: var(--color-surface-bg);
+  color: var(--color-text-primary);
+}
+
+body {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-headline {
+  font-family: var(--font-geist), var(--font-inter), ui-sans-serif, system-ui,
+    sans-serif;
+}
+
+.font-mono-token {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px #00b386, 0 0 0 3px rgba(0, 179, 134, 0.15);
+}
