@@ -18,7 +18,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const base = apiBase();
   if (!base) {
     throw new Error(
-      "NEXT_PUBLIC_API_BASE_URL is not set. Point it at your Railway API (no trailing slash).",
+      "NEXT_PUBLIC_API_BASE_URL is not set. Point it at your backend API (no trailing slash).",
     );
   }
   const res = await fetch(`${base}${path}`, {
