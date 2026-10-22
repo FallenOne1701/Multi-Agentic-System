@@ -15,9 +15,23 @@ from groww_support.contracts import SessionState
 from groww_support.orchestrator import handle_complaint
 from groww_support.orchestrator import refine as refine_session
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DATA_DIR = Path(os.environ.get("DATA_DIR", REPO_ROOT / "data"))
-DEFAULT_OUTPUT_DIR = Path(os.environ.get("OUTPUT_DIR", REPO_ROOT / "output"))
+def _resolve_dir(env_key: str, leaf: str) -> Path:
+    """Prefer env, then cwd (Render/Railway checkout), then source-tree fallback."""
+    if raw := os.environ.get(env_key):
+        return Path(raw)
+    cwd_candidate = Path.cwd() / leaf
+    if cwd_candidate.is_dir() or leaf == "output":
+        # output/ may not exist yet; create under cwd when that is the checkout root
+        if leaf == "output" and (Path.cwd() / "data").is_dir():
+            return cwd_candidate
+        if cwd_candidate.is_dir():
+            return cwd_candidate
+    # Editable/local: src/groww_support/api.py -> repo root
+    return Path(__file__).resolve().parents[2] / leaf
+
+
+DEFAULT_DATA_DIR = _resolve_dir("DATA_DIR", "data")
+DEFAULT_OUTPUT_DIR = _resolve_dir("OUTPUT_DIR", "output")
 
 app = FastAPI(title="Groww Support Reply API", version="0.1.0")
 
@@ -89,6 +103,14 @@ async def health() -> dict[str, str]:
 
 @app.post("/v1/complaints", response_model=SessionOut)
 async def create_complaint(body: ComplaintIn) -> SessionOut:
+    if not (DEFAULT_DATA_DIR / "parsed").is_dir():
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                f"Corpus not found at {DEFAULT_DATA_DIR}. "
+                "Set DATA_DIR to the repo data/ folder on the host."
+            ),
+        )
     session = await handle_complaint(body.text, DEFAULT_DATA_DIR)
     session_id = str(uuid.uuid4())
     _save(session_id, session)
